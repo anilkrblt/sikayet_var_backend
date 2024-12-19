@@ -1,0 +1,6 @@
+@sikayet_var_HostAddress = http://localhost:5233
+
+GET {{sikayet_var_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
