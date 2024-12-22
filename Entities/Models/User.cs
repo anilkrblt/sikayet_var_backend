@@ -15,7 +15,6 @@ namespace Entities.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        // Navigation Properties
         public ICollection<Complaint>? Complaints { get; set; }
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<Report>? Reports { get; set; }
