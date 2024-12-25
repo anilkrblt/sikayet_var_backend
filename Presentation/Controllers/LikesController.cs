@@ -5,7 +5,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/like")]
     public class LikesController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -47,13 +47,13 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateLike([FromBody] LikeDto like)
+        public async Task<IActionResult> CreateLike([FromBody] LikeCreateDto like)
         {
             if (like is null)
                 return BadRequest("Like object is null");
 
-            await _serviceManager.LikeService.CreateLikeAsync(like);
-            return CreatedAtAction(nameof(GetLikeById), new { id = like.Id }, like);
+            var likeCreated = _serviceManager.LikeService.CreateLikeAsync(like);
+            return CreatedAtAction(nameof(GetLikeById), new { id = likeCreated.Id }, likeCreated);
         }
 
         [HttpDelete("{id}")]

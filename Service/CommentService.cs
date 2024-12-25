@@ -1,8 +1,8 @@
 using AutoMapper;
-using Contracts;                       // ILoggerManager, IRepositoryManager vb.
-using Entities.Models;                 // Comment entity
-using Service.Contracts;               // ICommentService
-using Shared.DataTransferObjects;      // CommentDto
+using Contracts;
+using Entities.Models;
+using Service.Contracts;
+using Shared.DataTransferObjects;
 
 namespace Service
 {
@@ -21,11 +21,6 @@ namespace Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Tüm yorumların DTO listesini döner.
-        /// </summary>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>CommentDto listesi</returns>
         public async Task<IEnumerable<CommentDto>> GetAllCommentsAsync(bool trackChanges)
         {
             _logger.LogInfo("Fetching all comments from the database.");
@@ -44,12 +39,6 @@ namespace Service
             return commentsDto;
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip yorumu DTO olarak döner.
-        /// </summary>
-        /// <param name="commentId">Aranacak yorumun ID'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>CommentDto veya null</returns>
         public async Task<CommentDto> GetCommentByIdAsync(int commentId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching comment with Id = {commentId}.");
@@ -66,12 +55,6 @@ namespace Service
             return commentDto;
         }
 
-        /// <summary>
-        /// Bir şikâyete (complaintId) ait yorumları DTO listesi olarak döner.
-        /// </summary>
-        /// <param name="complaintId">Yorumları getirilecek şikâyet Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>CommentDto listesi</returns>
         public async Task<IEnumerable<CommentDto>> GetCommentsByComplaintAsync(int complaintId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching comments for complaint with Id = {complaintId}.");
@@ -89,12 +72,6 @@ namespace Service
             return commentsDto;
         }
 
-        /// <summary>
-        /// Bir kullanıcı (userId) tarafından yazılan yorumları DTO listesi olarak döner.
-        /// </summary>
-        /// <param name="userId">Yorumları getirilecek kullanıcının Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>CommentDto listesi</returns>
         public async Task<IEnumerable<CommentDto>> GetCommentsByUserAsync(int userId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching comments for user with Id = {userId}.");
@@ -112,51 +89,76 @@ namespace Service
             return commentsDto;
         }
 
-        /// <summary>
-        /// Yeni bir yorum (Comment) oluşturur.
-        /// </summary>
-        /// <param name="comment">Oluşturulacak yorumun DTO nesnesi</param>
-        public async Task CreateCommentAsync(CommentDto comment)
+
+        public async Task<CommentDto> CreateCommentAsync(CommentCreateDto comment)
         {
             if (comment == null)
             {
                 _logger.LogError("CreateCommentAsync: CommentDto object is null.");
-                return;
+                throw new ArgumentNullException();
             }
 
             _logger.LogInfo($"Creating a new comment by UserId = {comment.UserId} for ComplaintId = {comment.ComplaintId}.");
 
             // DTO -> Entity
             var commentEntity = _mapper.Map<Comment>(comment);
+            commentEntity.CreatedAt = DateTime.Now;
+            commentEntity.UpdatedAt = DateTime.Now;
+
+            var commentDto = new CommentDto(commentEntity.Id, commentEntity.ComplaintId, commentEntity.UserId, commentEntity.Content, DateTime.Now, DateTime.Now);
 
             // Repository üzerinden ekle
             _repository.Comment.CreateComment(commentEntity);
             await _repository.SaveAsync();
 
+            var notificationDto = new NotificationDto
+            {
+                UserId = (int)comment.UserId,
+                Type = "CommentAdded",
+                Content = $"Your complaint has a new comment: {comment.Content}",
+                IsRead = false
+            };
+            var notification = _mapper.Map<Notification>(notificationDto);
+            notification.CreatedAt = DateTime.Now;
+            _repository.Notification.CreateNotification(notification);
+
+
             _logger.LogInfo($"Comment created successfully with Id = {commentEntity.Id}.");
+            return commentDto;
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip yorumu siler.
-        /// </summary>
-        /// <param name="commentId">Silinecek yorumun Id'si</param>
-        public async Task DeleteCommentAsync(int commentId)
-        {
-            _logger.LogInfo($"Attempting to delete comment with Id = {commentId}.");
 
-            // Silinecek yorumu getir
-            var commentEntity = await _repository.Comment.GetCommentByIdAsync(commentId, trackChanges: false);
-            if (commentEntity == null)
+
+        public async Task DeleteCommentAsync(int commentId, int userId)
+        {
+            var comment = await _repository.Comment.GetCommentByIdAsync(commentId, trackChanges: true);
+            if (comment is null)
             {
                 _logger.LogWarn($"Comment with Id = {commentId} not found. Deletion canceled.");
-                return;
+                throw new KeyNotFoundException("Comment not found.");
             }
 
-            // Repository üzerinden sil
-            _repository.Comment.DeleteComment(commentEntity);
-            await _repository.SaveAsync();
+            if (comment.UserId != userId)
+                throw new UnauthorizedAccessException("You are not authorized to delete this comment.");
 
+            _repository.Comment.DeleteComment(comment);
+            await _repository.SaveAsync();
             _logger.LogInfo($"Comment with Id = {commentId} deleted successfully.");
+
         }
+        public async Task DeleteCommentByAdminAsync(int commentId)
+        {
+            var comment = await _repository.Comment.GetCommentByIdAsync(commentId, trackChanges: true);
+            if (comment is null)
+            {
+                _logger.LogWarn($"Comment with Id = {commentId} not found. Deletion canceled.");
+                throw new KeyNotFoundException("Comment not found.");
+            }
+
+            _repository.Comment.DeleteComment(comment);
+            await _repository.SaveAsync();
+        }
+
+
     }
 }

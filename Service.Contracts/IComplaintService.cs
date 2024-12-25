@@ -9,7 +9,7 @@ namespace Service.Contracts
         Task<ComplaintDto> GetComplaintByIdAsync(int complaintId, bool trackChanges);
         Task<IEnumerable<ComplaintDto>> GetComplaintsByUserAsync(int userId, bool trackChanges);
         Task<IEnumerable<ComplaintDto>> GetComplaintsByProductAsync(int productId, bool trackChanges);
-        Task CreateComplaintAsync(ComplaintDto complaint);
-        Task DeleteComplaintAsync(int complaintId);
+        Task CreateComplaintAsync(ComplaintCreateDto complaint);
+        void DeleteComplaint(int complaintId);
     }
 }

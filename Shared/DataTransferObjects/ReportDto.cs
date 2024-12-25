@@ -15,4 +15,10 @@ namespace Shared.DataTransferObjects
      DateTime? CreatedAt,
      DateTime? UpdatedAt
  );
+    public record ReportCreateDto(
+       int ReporterUserId,
+       string TargetType,
+       int TargetId,
+       string Reason
+   );
 }

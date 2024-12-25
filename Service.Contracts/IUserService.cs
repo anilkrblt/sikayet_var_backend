@@ -10,5 +10,8 @@ namespace Service.Contracts
         Task<UserDto> GetUserByUsernameAsync(string username, bool trackChanges);
         Task<UserDto> CreateUserAsync(UserDto userDto);
         Task DeleteUserAsync(int userId);
+        Task RegisterUserAsync(UserForRegistrationDto userDto);
+        Task UpdateUserAsync(int userId, UserForUpdateDto userDto);
+
     }
 }

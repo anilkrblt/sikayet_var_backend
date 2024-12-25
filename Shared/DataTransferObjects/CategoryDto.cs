@@ -12,4 +12,9 @@ namespace Shared.DataTransferObjects
     DateTime? CreatedAt,
     DateTime? UpdatedAt
 );
+
+    public record CategoryCreateDto(
+        string Name,
+        string? Description
+    );
 }

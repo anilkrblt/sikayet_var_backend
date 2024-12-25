@@ -1,8 +1,8 @@
 using AutoMapper;
-using Contracts;                 // IRepositoryManager ve ILoggerManager arayüzleri
-using Entities.Models;           // Report entity
-using Service.Contracts;         // IReportService interface
-using Shared.DataTransferObjects; // ReportDto
+using Contracts;                
+using Entities.Models;           
+using Service.Contracts;         
+using Shared.DataTransferObjects; 
 
 namespace Service
 {
@@ -21,11 +21,7 @@ namespace Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Tüm raporları DTO şeklinde döner.
-        /// </summary>
-        /// <param name="trackChanges">EF Core'un değişiklikleri takip edip etmeyeceği</param>
-        /// <returns>Raporların DTO listesi</returns>
+     
         public async Task<IEnumerable<ReportDto>> GetAllReportsAsync(bool trackChanges)
         {
             _logger.LogInfo("Fetching all reports from the database via repository.");
@@ -46,12 +42,7 @@ namespace Service
             return reportsDto;
         }
 
-        /// <summary>
-        /// ID bazında tekil bir raporu DTO olarak döner.
-        /// </summary>
-        /// <param name="reportId">Aranacak raporun ID'si</param>
-        /// <param name="trackChanges">EF Core'un değişiklikleri takip edip etmeyeceği</param>
-        /// <returns>Tekil bir rapor DTO veya null</returns>
+      
         public async Task<ReportDto> GetReportByIdAsync(int reportId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching report with Id = {reportId}");
@@ -68,13 +59,6 @@ namespace Service
 
             return reportDto;
         }
-
-        /// <summary>
-        /// Belirli bir kullanıcı (reporterUserId) tarafından oluşturulan raporları döner
-        /// </summary>
-        /// <param name="reporterUserId">Raporları getirilmek istenen kullanıcının Id'si</param>
-        /// <param name="trackChanges">EF Core'un değişiklikleri takip edip etmeyeceği</param>
-        /// <returns>Belirtilen kullanıcıya ait raporların DTO listesi</returns>
         public async Task<IEnumerable<ReportDto>> GetReportsByReporterAsync(int reporterUserId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching reports created by user with Id = {reporterUserId}");
@@ -92,11 +76,8 @@ namespace Service
             return reportsDto;
         }
 
-        /// <summary>
-        /// Yeni rapor oluşturur.
-        /// </summary>
-        /// <param name="reportDto">Oluşturulacak raporun DTO'su</param>
-        public async Task CreateReportAsync(ReportDto reportDto)
+        
+        public async Task CreateReportAsync(ReportCreateDto reportDto)
         {
             if (reportDto == null)
             {
@@ -104,10 +85,13 @@ namespace Service
                 return;
             }
 
-            _logger.LogInfo($"Creating a new report with Title = '{reportDto.Id}'");
+            _logger.LogInfo($"Creating a new report with Title = '{reportDto.Reason}'");
 
             // DTO -> Entity
             var reportEntity = _mapper.Map<Report>(reportDto);
+            reportEntity.CreatedAt = DateTime.Now;
+            reportEntity.UpdatedAt = DateTime.Now;
+            reportEntity.Status = "open";
 
             // Repository aracılığıyla ekleme
             _repository.Report.CreateReport(reportEntity);
@@ -118,10 +102,7 @@ namespace Service
             _logger.LogInfo($"Report created successfully with Id = {reportEntity.Id}.");
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip raporu siler.
-        /// </summary>
-        /// <param name="reportId">Silinecek raporun Id'si</param>
+        
         public async Task DeleteReportAsync(int reportId)
         {
             _logger.LogInfo($"Attempting to delete report with Id = {reportId}.");

@@ -5,7 +5,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/reports")]
     public class ReportsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -40,13 +40,13 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateReport([FromBody] ReportDto report)
+        public async Task<IActionResult> CreateReport([FromBody] ReportCreateDto report)
         {
             if (report is null)
                 return BadRequest("Report object is null");
 
-            await _serviceManager.ReportService.CreateReportAsync(report);
-            return CreatedAtAction(nameof(GetReportById), new { id = report.Id }, report);
+            var reportCreated =  _serviceManager.ReportService.CreateReportAsync(report);
+            return CreatedAtAction(nameof(GetReportById), new { id = reportCreated.Id }, reportCreated);
         }
 
         [HttpDelete("{id}")]

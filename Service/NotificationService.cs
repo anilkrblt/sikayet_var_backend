@@ -1,8 +1,8 @@
 using AutoMapper;
-using Contracts;                       // IRepositoryManager, ILoggerManager vb.
-using Entities.Models;                 // Notification entity
-using Service.Contracts;               // INotificationService
-using Shared.DataTransferObjects;      // NotificationDto
+using Contracts;
+using Entities.Models;
+using Service.Contracts;
+using Shared.DataTransferObjects;
 
 namespace Service
 {
@@ -21,11 +21,6 @@ namespace Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Tüm bildirimlerin (Notification) DTO listesini döner.
-        /// </summary>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>NotificationDto listesi</returns>
         public async Task<IEnumerable<NotificationDto>> GetAllNotificationsAsync(bool trackChanges)
         {
             _logger.LogInfo("Fetching all notifications from the database.");
@@ -44,12 +39,7 @@ namespace Service
             return notificationsDto;
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip bildirimi DTO olarak döner.
-        /// </summary>
-        /// <param name="notificationId">Aranacak bildirimin ID'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>NotificationDto veya null</returns>
+
         public async Task<NotificationDto> GetNotificationByIdAsync(int notificationId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching notification with Id = {notificationId}.");
@@ -66,12 +56,7 @@ namespace Service
             return notificationDto;
         }
 
-        /// <summary>
-        /// Belirli bir kullanıcıya (userId) ait tüm bildirimleri DTO listesi olarak döner.
-        /// </summary>
-        /// <param name="userId">Kullanıcı Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>NotificationDto listesi</returns>
+
         public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserAsync(int userId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching notifications for user with Id = {userId}.");
@@ -89,12 +74,7 @@ namespace Service
             return notificationsDto;
         }
 
-        /// <summary>
-        /// Belirli bir kullanıcıya ait "okunmamış" bildirimleri döner.
-        /// </summary>
-        /// <param name="userId">Kullanıcı Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>Okunmamış notificationDto listesi</returns>
+
         public async Task<IEnumerable<NotificationDto>> GetUnreadNotificationsByUserAsync(int userId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching unread notifications for user with Id = {userId}.");
@@ -112,10 +92,7 @@ namespace Service
             return unreadNotificationsDto;
         }
 
-        /// <summary>
-        /// Yeni bir bildirim (Notification) oluşturur.
-        /// </summary>
-        /// <param name="notification">Oluşturulacak bildirimin DTO nesnesi</param>
+
         public async Task CreateNotificationAsync(NotificationDto notification)
         {
             if (notification == null)
@@ -136,10 +113,7 @@ namespace Service
             _logger.LogInfo($"Notification created successfully with Id = {notificationEntity.Id}.");
         }
 
-        /// <summary>
-        /// Bir bildirimi "okunmuş" olarak işaretler (IsRead = true).
-        /// </summary>
-        /// <param name="notificationId">Okunmuş olarak işaretlenecek bildirimin Id'si</param>
+
         public async Task MarkNotificationAsReadAsync(int notificationId)
         {
             _logger.LogInfo($"Attempting to mark notification with Id = {notificationId} as read.");
@@ -163,10 +137,7 @@ namespace Service
             _logger.LogInfo($"Notification with Id = {notificationId} was marked as read successfully.");
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip bildirimi siler.
-        /// </summary>
-        /// <param name="notificationId">Silinecek bildirimin Id'si</param>
+
         public async Task DeleteNotificationAsync(int notificationId)
         {
             _logger.LogInfo($"Attempting to delete notification with Id = {notificationId}.");
@@ -183,5 +154,29 @@ namespace Service
 
             _logger.LogInfo($"Notification with Id = {notificationId} deleted successfully.");
         }
+
+        public async Task SendNotificationAsync(NotificationDto notificationDto)
+        {
+            if (notificationDto == null)
+            {
+                _logger.LogError("SendNotificationAsync: NotificationDto object is null.");
+                throw new ArgumentNullException(nameof(notificationDto));
+            }
+
+            _logger.LogInfo($"Sending notification to user with Id = {notificationDto.UserId}.");
+
+            // DTO -> Entity
+            var notificationEntity = _mapper.Map<Notification>(notificationDto);
+
+            // Set created date
+            notificationEntity.CreatedAt = DateTime.UtcNow;
+
+            // Add the notification to the repository
+            _repository.Notification.CreateNotification(notificationEntity);
+            await _repository.SaveAsync();
+
+            _logger.LogInfo($"Notification sent successfully and saved to the database with Id = {notificationEntity.Id}.");
+        }
+
     }
 }

@@ -5,7 +5,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/categories")]
     public class CategoriesController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -33,14 +33,18 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategory([FromBody] CategoryDto category)
+        public IActionResult CreateCategory([FromBody] CategoryCreateDto category)
         {
             if (category is null)
                 return BadRequest("Category object is null");
 
-            await _serviceManager.CategoryService.CreateCategoryAsync(category);
-            return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
+            // Servisten dönen CategoryDto
+            var createdCategory =  _serviceManager.CategoryService.CreateCategoryAsync(category);
+
+            // Oluşturulan Category'i döndür
+            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)

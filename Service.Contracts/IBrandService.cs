@@ -7,7 +7,7 @@ namespace Service.Contracts
     {
         Task<IEnumerable<BrandDto>> GetAllBrandsAsync(bool trackChanges);
         Task<BrandDto> GetBrandByIdAsync(int brandId, bool trackChanges);
-        Task CreateBrandAsync(BrandDto brand);
+        Task CreateBrandAsync(BrandCreateDto brand);
         Task DeleteBrandAsync(int brandId);
     }
 }

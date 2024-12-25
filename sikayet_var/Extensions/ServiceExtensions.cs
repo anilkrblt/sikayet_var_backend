@@ -1,6 +1,10 @@
+using System.Text;
 using Contracts;
 using LoggerService;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Repository;
 using Service;
 using Service.Contracts;
@@ -14,25 +18,14 @@ namespace sikayet_var.Extensions
                 options =>
             {
                 options.AddPolicy("CorsPolicy", builder =>
-                    builder.AllowAnyOrigin()    //   WithOrigins("https://example.com")
-                            .AllowAnyMethod()   //   WithMethods("POST", "GET")
-                            .AllowAnyHeader() //   WithHeaders("accept", "content-type")
-                                                
-                            .WithExposedHeaders("X-Pagination")); //to enable the client application to read the 
-                                                                  //new X-Pagination  header that we’ve added in our action
-
-
-                        
+                    builder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader());
             });
 
         public static void ConfigureISSIntegration(this IServiceCollection services) =>
             services.Configure<IISOptions>(options =>
             {
-                /*
-                We do not initialize any of the properties inside the options because we 
-                are fine with the default values for now.
-                Sayfa 9
-                */
             });
 
         public static void ConfigureLoggerService(this IServiceCollection services) =>
@@ -51,6 +44,79 @@ namespace sikayet_var.Extensions
                                                      opts.UseSqlite(configuration.GetConnectionString("sqliteConnection")));
 
 
+        public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
+        {
+            var jwtSettings = configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["SecretKey"];
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+        }
+        public static void ConfigureTokenService(this IServiceCollection services) =>
+           services.AddScoped<ITokenService, TokenService>();
+
+
+
+
+        public static void ConfigureSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Şikayet Var API",
+                    Version = "v1",
+                    Description = "Şikayet Var API",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Şikayet Var Ekibi",
+                        Email = "support@sikayetvar.com"
+                    }
+                });
+
+                // JWT Authentication Configuration
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' followed by your JWT token in the text box below.\nExample: Bearer eyJhbGciOiJIUzI1NiIs..."
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+                });
+            });
+        }
 
 
     }

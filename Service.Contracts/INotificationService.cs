@@ -12,5 +12,6 @@ namespace Service.Contracts
         Task CreateNotificationAsync(NotificationDto notification);
         Task MarkNotificationAsReadAsync(int notificationId);
         Task DeleteNotificationAsync(int notificationId);
+        Task SendNotificationAsync(NotificationDto notificationDto);
     }
 }

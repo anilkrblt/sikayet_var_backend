@@ -13,4 +13,9 @@ namespace Shared.DataTransferObjects
     DateTime? UpdatedAt
 );
 
+  public record BrandCreateDto(
+      string Name,
+      string? Description
+  );
+
 }

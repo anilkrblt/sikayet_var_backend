@@ -5,7 +5,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/notifications")]
     public class NotificationsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -46,22 +46,6 @@ namespace Presentation.Controllers
             return Ok(unreadNotifications);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateNotification([FromBody] NotificationDto notification)
-        {
-            if (notification is null)
-                return BadRequest("Notification object is null");
-
-            await _serviceManager.NotificationService.CreateNotificationAsync(notification);
-            return CreatedAtAction(nameof(GetNotificationById), new { id = notification.Id }, notification);
-        }
-
-        [HttpPut("{id}/markasread")]
-        public async Task<IActionResult> MarkNotificationAsRead(int id)
-        {
-            await _serviceManager.NotificationService.MarkNotificationAsReadAsync(id);
-            return NoContent();
-        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNotification(int id)
@@ -69,5 +53,6 @@ namespace Presentation.Controllers
             await _serviceManager.NotificationService.DeleteNotificationAsync(id);
             return NoContent();
         }
+  
     }
 }

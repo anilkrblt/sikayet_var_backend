@@ -9,7 +9,7 @@ namespace Service.Contracts
         Task<LikeDto> GetLikeByIdAsync(int likeId, bool trackChanges);
         Task<IEnumerable<LikeDto>> GetLikesByUserAsync(int userId, bool trackChanges);
         Task<IEnumerable<LikeDto>> GetLikesByComplaintAsync(int complaintId, bool trackChanges);
-        Task CreateLikeAsync(LikeDto like);
+        Task CreateLikeAsync(LikeCreateDto like);
         Task DeleteLikeAsync(int likeId);
     }
 }

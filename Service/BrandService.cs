@@ -1,8 +1,9 @@
 using AutoMapper;
-using Contracts;                   // ILoggerManager, IRepositoryManager arayüzlerinin burada olduğunu varsayıyoruz
-using Entities.Models;             // Brand entity
-using Service.Contracts;           // IBrandService arayüzü
-using Shared.DataTransferObjects;   // BrandDto
+using Contracts;                 
+using Entities.Exceptions;
+using Entities.Models;         
+using Service.Contracts;           
+using Shared.DataTransferObjects;   
 
 namespace Service
 {
@@ -21,16 +22,11 @@ namespace Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Tüm markaların (Brand) DTO listesini döner
-        /// </summary>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>BrandDto listesi</returns>
+        
         public async Task<IEnumerable<BrandDto>> GetAllBrandsAsync(bool trackChanges)
         {
             _logger.LogInfo("Fetching all brands from the database.");
 
-            // 1) Repository'den markaları çek
             var brands = await _repository.Brand.GetAllBrandsAsync(trackChanges);
 
             if (brands == null || !brands.Any())
@@ -39,25 +35,15 @@ namespace Service
                 return Enumerable.Empty<BrandDto>();
             }
 
-            // 2) Brand -> BrandDto dönüştür
             var brandsDto = _mapper.Map<IEnumerable<BrandDto>>(brands);
-
             _logger.LogInfo($"{brandsDto.Count()} brand(s) fetched successfully from the database.");
-
             return brandsDto;
         }
 
-        /// <summary>
-        /// ID bazında tekil bir markanın DTO'sunu döner
-        /// </summary>
-        /// <param name="brandId">Aranacak markanın ID'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>BrandDto veya null</returns>
         public async Task<BrandDto> GetBrandByIdAsync(int brandId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching brand with Id = {brandId}.");
 
-            // 1) Repository'den ilgili brand'i çek
             var brand = await _repository.Brand.GetBrandByIdAsync(brandId, trackChanges);
             if (brand == null)
             {
@@ -65,48 +51,33 @@ namespace Service
                 return null;
             }
 
-            // 2) Brand -> BrandDto dönüştür
             var brandDto = _mapper.Map<BrandDto>(brand);
 
             _logger.LogInfo($"Brand with Id = {brandId} fetched successfully.");
             return brandDto;
         }
-
-        /// <summary>
-        /// Yeni bir marka (Brand) oluşturur
-        /// </summary>
-        /// <param name="brandDto">Oluşturulacak markanın DTO nesnesi</param>
-        public async Task CreateBrandAsync(BrandDto brandDto)
+        public async Task CreateBrandAsync(BrandCreateDto brandDto)
         {
             if (brandDto == null)
             {
                 _logger.LogError("CreateBrandAsync: BrandDto object is null.");
-                return;
+                throw new BrandNotFoundException();
             }
 
             _logger.LogInfo($"Creating a new brand with Name = '{brandDto.Name}'.");
 
-            // 1) BrandDto -> Brand entity
             var brandEntity = _mapper.Map<Brand>(brandDto);
-
-            // 2) Repository aracılığıyla ekleme
+            brandEntity.CreatedAt = DateTime.Now;
+            brandEntity.UpdatedAt = DateTime.Now;
             _repository.Brand.CreateBrand(brandEntity);
-
-            // 3) Kaydet
             await _repository.SaveAsync();
-
             _logger.LogInfo($"Brand created successfully with Id = {brandEntity.Id}.");
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip markayı siler
-        /// </summary>
-        /// <param name="brandId">Silinecek markanın Id'si</param>
         public async Task DeleteBrandAsync(int brandId)
         {
             _logger.LogInfo($"Attempting to delete brand with Id = {brandId}.");
 
-            // 1) Önce brand var mı diye kontrol edelim
             var brandEntity = await _repository.Brand.GetBrandByIdAsync(brandId, trackChanges: false);
             if (brandEntity == null)
             {
@@ -114,12 +85,8 @@ namespace Service
                 return;
             }
 
-            // 2) Repository üzerinden sil
             _repository.Brand.DeleteBrand(brandEntity);
-
-            // 3) Kaydet
             await _repository.SaveAsync();
-
             _logger.LogInfo($"Brand with Id = {brandId} deleted successfully.");
         }
     }

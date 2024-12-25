@@ -14,4 +14,10 @@ namespace Shared.DataTransferObjects
     DateTime? CreatedAt,
     DateTime? UpdatedAt
 );
+    public record ProductCreateDto(
+        int BrandId,
+        int CategoryId,
+        string Name,
+        string? Description
+    );
 }

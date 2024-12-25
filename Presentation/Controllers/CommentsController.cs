@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -5,7 +6,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/comments")]
     public class CommentsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -15,6 +16,7 @@ namespace Presentation.Controllers
             _serviceManager = serviceManager;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllComments()
         {
@@ -32,6 +34,7 @@ namespace Presentation.Controllers
             return Ok(comment);
         }
 
+        [AllowAnonymous]
         [HttpGet("complaint/{complaintId}")]
         public async Task<IActionResult> GetCommentsByComplaint(int complaintId)
         {
@@ -39,6 +42,7 @@ namespace Presentation.Controllers
             return Ok(comments);
         }
 
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetCommentsByUser(int userId)
         {
@@ -46,20 +50,29 @@ namespace Presentation.Controllers
             return Ok(comments);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateComment([FromBody] CommentDto comment)
-        {
-            if (comment is null)
-                return BadRequest("Comment object is null");
 
-            await _serviceManager.CommentService.CreateCommentAsync(comment);
-            return CreatedAtAction(nameof(GetCommentById), new { id = comment.Id }, comment);
+        [HttpPost]
+        public async Task<IActionResult> CreateComment([FromBody] CommentCreateDto comment)
+        {
+
+            var createdComment = await _serviceManager.CommentService.CreateCommentAsync(comment);
+            return RedirectToAction("GetCommentById", new { id = createdComment.Id });
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            await _serviceManager.CommentService.DeleteCommentAsync(id);
+            var userId = int.Parse(User.FindFirst("id")?.Value);
+            await _serviceManager.CommentService.DeleteCommentAsync(id, userId);
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("admin/{id}")]
+        public async Task<IActionResult> DeleteCommentByAdmin(int id)
+        {
+            await _serviceManager.CommentService.DeleteCommentByAdminAsync(id);
             return NoContent();
         }
     }

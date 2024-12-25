@@ -7,7 +7,7 @@ namespace Service.Contracts
     {
         Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync(bool trackChanges);
         Task<CategoryDto> GetCategoryByIdAsync(int categoryId, bool trackChanges);
-        Task CreateCategoryAsync(CategoryDto category);
+        Task CreateCategoryAsync(CategoryCreateDto category);
         Task DeleteCategoryAsync(int categoryId);
     }
 }

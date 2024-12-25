@@ -21,8 +21,8 @@ namespace Repository
             // modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         }
 
-        public DbSet<Brand>? Companies { get; set; }
-        public DbSet<Category>? Employees { get; set; }
+        public DbSet<Brand>? Brands { get; set; }
+        public DbSet<Category>? Categories { get; set; }
         public DbSet<Comment>? Comments { get; set; }
         public DbSet<Complaint>? Complaints { get; set; }
         public DbSet<Like>? Likes { get; set; }

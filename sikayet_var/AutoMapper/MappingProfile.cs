@@ -32,6 +32,33 @@ namespace sikayet_var.AutoMapper
             CreateMap<Report, ReportDto>().ReverseMap();
             CreateMap<User, UserDto>().ReverseMap();
 
+            // UserDto -> User
+            CreateMap<UserDto, User>().ReverseMap();
+
+            // UserForRegistrationDto -> User
+            CreateMap<UserForRegistrationDto, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Eğer hash işlemi yapılacaksa burayı özelleştirin.
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)) // Varsayılan değerler.
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)).ReverseMap();
+
+            // UserForUpdateDto -> User
+            CreateMap<UserForUpdateDto, User>()
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
+
+            CreateMap<BrandCreateDto, Brand>();
+            CreateMap<CategoryCreateDto, Category>();
+
+            CreateMap<CommentCreateDto, Comment>();
+
+            CreateMap<ComplaintCreateDto, Complaint>();
+
+            CreateMap<LikeCreateDto, Like>();
+
+            CreateMap<ProductCreateDto, Product>();
+
+            CreateMap<ReportCreateDto, Report>();
+
+
 
 
         }

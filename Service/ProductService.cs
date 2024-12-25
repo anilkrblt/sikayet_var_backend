@@ -1,8 +1,8 @@
 using AutoMapper;
-using Contracts;                       // IRepositoryManager, ILoggerManager vb.
-using Entities.Models;                 // Product entity
-using Service.Contracts;               // IProductService
-using Shared.DataTransferObjects;      // ProductDto
+using Contracts;                      
+using Entities.Models;               
+using Service.Contracts;              
+using Shared.DataTransferObjects;      
 
 namespace Service
 {
@@ -21,11 +21,7 @@ namespace Service
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Tüm ürünlerin DTO listesini döner.
-        /// </summary>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>ProductDto listesi</returns>
+      
         public async Task<IEnumerable<ProductDto>> GetAllProductsAsync(bool trackChanges)
         {
             _logger.LogInfo("Fetching all products from the database.");
@@ -44,12 +40,7 @@ namespace Service
             return productsDto;
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip ürünü (Product) DTO olarak döner.
-        /// </summary>
-        /// <param name="productId">Aranacak ürünün ID'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>ProductDto veya null</returns>
+       
         public async Task<ProductDto> GetProductByIdAsync(int productId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching product with Id = {productId}.");
@@ -66,12 +57,7 @@ namespace Service
             return productDto;
         }
 
-        /// <summary>
-        /// Belirtilen markaya (brandId) ait ürünleri DTO listesi olarak döner.
-        /// </summary>
-        /// <param name="brandId">Ürünleri getirilecek markanın Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>ProductDto listesi</returns>
+      
         public async Task<IEnumerable<ProductDto>> GetProductsByBrandAsync(int brandId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching products for brand with Id = {brandId}.");
@@ -89,12 +75,7 @@ namespace Service
             return productsDto;
         }
 
-        /// <summary>
-        /// Belirtilen kategoriye (categoryId) ait ürünleri DTO listesi olarak döner.
-        /// </summary>
-        /// <param name="categoryId">Ürünleri getirilecek kategorinin Id'si</param>
-        /// <param name="trackChanges">EF Core değişiklik izleme (tracking) seçeneği</param>
-        /// <returns>ProductDto listesi</returns>
+       
         public async Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(int categoryId, bool trackChanges)
         {
             _logger.LogInfo($"Fetching products for category with Id = {categoryId}.");
@@ -112,11 +93,8 @@ namespace Service
             return productsDto;
         }
 
-        /// <summary>
-        /// Yeni bir ürün (Product) oluşturur.
-        /// </summary>
-        /// <param name="product">Oluşturulacak ürünün DTO nesnesi</param>
-        public async Task CreateProductAsync(ProductDto product)
+       
+        public async Task CreateProductAsync(ProductCreateDto product)
         {
             if (product == null)
             {
@@ -128,6 +106,8 @@ namespace Service
 
             // DTO -> Entity
             var productEntity = _mapper.Map<Product>(product);
+            productEntity.CreatedAt = DateTime.Now;
+            productEntity.UpdatedAt = DateTime.Now;
 
             // Repository üzerinden ekle
             _repository.Product.CreateProduct(productEntity);
@@ -138,10 +118,7 @@ namespace Service
             _logger.LogInfo($"Product created successfully with Id = {productEntity.Id}.");
         }
 
-        /// <summary>
-        /// Belirtilen Id'ye sahip ürünü siler.
-        /// </summary>
-        /// <param name="productId">Silinecek ürünün Id'si</param>
+    
         public async Task DeleteProductAsync(int productId)
         {
             _logger.LogInfo($"Attempting to delete product with Id = {productId}.");

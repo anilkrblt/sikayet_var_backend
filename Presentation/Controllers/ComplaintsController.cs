@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -5,7 +6,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/complaint")]
     public class ComplaintsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -47,20 +48,58 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateComplaint([FromBody] ComplaintDto complaint)
+        public IActionResult CreateComplaint([FromBody] ComplaintCreateDto complaint)
         {
             if (complaint is null)
                 return BadRequest("Complaint object is null");
 
-            await _serviceManager.ComplaintService.CreateComplaintAsync(complaint);
-            return CreatedAtAction(nameof(GetComplaintById), new { id = complaint.Id }, complaint);
+            var complaintCreated =  _serviceManager.ComplaintService.CreateComplaintAsync(complaint);
+            return CreatedAtAction(nameof(GetComplaintById), new { id = complaintCreated.Id }, complaintCreated);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComplaint(int id)
+        public IActionResult DeleteComplaint(int id)
         {
-            await _serviceManager.ComplaintService.DeleteComplaintAsync(id);
+            _serviceManager.ComplaintService.DeleteComplaint(id);
             return NoContent();
         }
+        /*
+                [HttpPatch("{id}/status")]
+                public async Task<IActionResult> UpdateComplaintStatus(int id, [FromBody] ComplaintStatusUpdateDto statusUpdate)
+                {
+                    if (statusUpdate is null)
+                        return BadRequest("Status update object is null");
+
+                    await _serviceManager.ComplaintService.UpdateComplaintStatusAsync(id, statusUpdate);
+                    return NoContent();
+                }
+                [Authorize(Roles = "Admin")]
+                [HttpDelete("{id}")]
+                public async Task<IActionResult> DeleteComplaintByAdmin(int id)
+                {
+                    await _serviceManager.ComplaintService.DeleteComplaintByAdminAsync(id);
+                    return NoContent();
+                }
+
+                [HttpGet("search")]
+                public async Task<IActionResult> SearchComplaints([FromQuery] string keyword)
+                {
+                    if (string.IsNullOrWhiteSpace(keyword))
+                        return BadRequest("Keyword cannot be empty");
+
+                    var complaints = await _serviceManager.ComplaintService.SearchComplaintsAsync(keyword, trackChanges: false);
+                    return Ok(complaints);
+                }*/
+
+
     }
 }
+/*
+
+
+
+
+
+
+
+*/

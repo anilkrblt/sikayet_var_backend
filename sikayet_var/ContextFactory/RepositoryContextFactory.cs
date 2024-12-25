@@ -19,7 +19,7 @@ namespace sikayet_var.ContextFactory
 
             var builder = new DbContextOptionsBuilder<RepositoryContext>()
 
-           .UseSqlite(configuration.GetConnectionString("sqliteConnection"), b => b.MigrationsAssembly("CompanyEmployees"));
+           .UseSqlite(configuration.GetConnectionString("sqliteConnection"), b => b.MigrationsAssembly("sikayet_var"));
             return new RepositoryContext(builder.Options);
         }
     }

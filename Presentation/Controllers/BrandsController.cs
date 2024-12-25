@@ -5,7 +5,7 @@ using Shared.DataTransferObjects;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/brands")]
     public class BrandsController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
@@ -33,14 +33,16 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateBrand([FromBody] BrandDto brand)
+        public IActionResult CreateBrand([FromBody] BrandCreateDto brand)
         {
             if (brand is null)
                 return BadRequest("Brand object is null");
 
-            await _serviceManager.BrandService.CreateBrandAsync(brand);
-            return CreatedAtAction(nameof(GetBrandById), new { id = brand.Id }, brand);
+            var createdBrand = _serviceManager.BrandService.CreateBrandAsync(brand);
+
+            return CreatedAtAction(nameof(GetBrandById), new { id = createdBrand.Id }, createdBrand);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBrand(int id)

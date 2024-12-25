@@ -11,4 +11,8 @@ namespace Shared.DataTransferObjects
      int? ComplaintId,
      DateTime? CreatedAt
  );
+    public record LikeCreateDto(
+       int UserId,
+       int ComplaintId
+   );
 }

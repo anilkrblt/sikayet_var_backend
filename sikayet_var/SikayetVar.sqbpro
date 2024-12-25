@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="SikayetVar.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2976"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Brands" custom_title="0" dock_id="1" table="4,6:mainBrands"/><dock_state state="000000ff00000000fd00000001000000020000043b000002e6fc0100000001fb000000160064006f0063006b00420072006f007700730065003101000000000000043b0000011b00ffffff000002580000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Brands" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="29"/><column index="2" value="41"/><column index="3" value="71"/><column index="4" value="64"/><column index="5" value="67"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Categories" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="29"/><column index="2" value="124"/><column index="3" value="234"/><column index="4" value="156"/><column index="5" value="156"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Notifications" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="29"/><column index="2" value="48"/><column index="3" value="78"/><column index="4" value="77"/><column index="5" value="257"/><column index="6" value="47"/><column index="7" value="156"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Products" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="29"/><column index="2" value="56"/><column index="3" value="73"/><column index="4" value="41"/><column index="5" value="71"/><column index="6" value="64"/><column index="7" value="67"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="Users" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="29"/><column index="2" value="140"/><column index="3" value="124"/><column index="4" value="64"/><column index="5" value="46"/><column index="6" value="156"/><column index="7" value="156"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1*">-- Tabloları temizle ve otomatik artan değerleri sıfırla
+
+DELETE FROM likes;
+DELETE FROM notifications;
+DELETE FROM reports;
+DELETE FROM comments;
+DELETE FROM complaints;
+DELETE FROM products;
+DELETE FROM brands;
+DELETE FROM categories;
+DELETE FROM users;
+
+-- SQLite kullanıyorsanız, otomatik artan değerleri sıfırlamak için bu komutları çalıştırabilirsiniz:
+DELETE FROM sqlite_sequence WHERE name='likes';
+DELETE FROM sqlite_sequence WHERE name='notifications';
+DELETE FROM sqlite_sequence WHERE name='reports';
+DELETE FROM sqlite_sequence WHERE name='comments';
+DELETE FROM sqlite_sequence WHERE name='complaints';
+DELETE FROM sqlite_sequence WHERE name='products';
+DELETE FROM sqlite_sequence WHERE name='brands';
+DELETE FROM sqlite_sequence WHERE name='categories';
+DELETE FROM sqlite_sequence WHERE name='users';
+
+
+
+
+-- Dummy data for users table
+INSERT INTO users (id, email, PasswordHash, username, role, CreatedAt, UpdatedAt) VALUES
+(1, 'user1@example.com', 'hashedpassword1', 'user1', 'user', datetime('now'), datetime('now')),
+(2, 'user2@example.com', 'hashedpassword2', 'user2', 'admin', datetime('now'), datetime('now')),
+(3, 'user3@example.com', 'hashedpassword3', 'user3', 'user', datetime('now'), datetime('now'));
+
+-- Dummy data for categories table
+INSERT INTO categories (id, name, description, CreatedAt, UpdatedAt) VALUES
+(1, 'Electronics', 'All kinds of electronic items', datetime('now'), datetime('now')),
+(2, 'Clothing', 'Apparel and garments', datetime('now'), datetime('now')),
+(3, 'Home Appliances', 'Appliances for household use', datetime('now'), datetime('now'));
+
+-- Dummy data for brands table
+INSERT INTO brands (id, name, description, CreatedAt, UpdatedAt) VALUES
+(1, 'BrandA', 'High quality electronics', datetime('now'), datetime('now')),
+(2, 'BrandB', 'Affordable clothing', datetime('now'), datetime('now')),
+(3, 'BrandC', 'Reliable home appliances', datetime('now'), datetime('now'));
+
+-- Dummy data for products table
+INSERT INTO products (id, BrandId, CategoryId, name, description, CreatedAt, UpdatedAt) VALUES
+(1, 1, 1, 'Smartphone Model X', 'Latest smartphone with advanced features', datetime('now'), datetime('now')),
+(2, 2, 2, 'Winter Jacket', 'Warm and comfortable', datetime('now'), datetime('now')),
+(3, 3, 3, 'Vacuum Cleaner 3000', 'Efficient and quiet', datetime('now'), datetime('now'));
+
+-- Dummy data for complaints table
+INSERT INTO complaints (id, UserId, ProductId, title, description, status, CreatedAt, UpdatedAt) VALUES
+(1, 1, 1, 'Defective Screen', 'The screen stopped working after 2 weeks.', 'Open', datetime('now'), datetime('now')),
+(2, 2, 2, 'Wrong Size', 'The jacket size delivered was incorrect.', 'Resolved', datetime('now'), datetime('now')),
+(3, 3, 3, 'Low Suction Power', 'The vacuum cleaner is not powerful enough.', 'Pending', datetime('now'), datetime('now'));
+
+-- Dummy data for comments table
+INSERT INTO comments (id, ComplaintId, UserId, content, CreatedAt, UpdatedAt) VALUES
+(1, 1, 2, 'Have you tried contacting customer support?', datetime('now'), datetime('now')),
+(2, 2, 3, 'I had the same issue with this brand.', datetime('now'), datetime('now')),
+(3, 3, 1, 'Check if the filter is clean.', datetime('now'), datetime('now'));
+
+-- Dummy data for reports table
+INSERT INTO reports (id, ReporterUserId, TargetType, TargetId, reason, status, CreatedAt, UpdatedAt) VALUES
+(1, 1, 'complaint', 1, 'Inappropriate content', 'Under Review', datetime('now'), datetime('now')),
+(2, 2, 'comment', 1, 'Spam', 'Resolved', datetime('now'), datetime('now'));
+
+-- Dummy data for likes table
+INSERT INTO likes (id, UserId, ComplaintId, CreatedAt) VALUES
+(1, 1, 1, datetime('now')),
+(2, 2, 2, datetime('now')),
+(3, 3, 3, datetime('now'));
+
+-- Dummy data for notifications table
+INSERT INTO notifications (id, UserId, type, ReferenceId, content, IsRead, CreatedAt) VALUES
+(1, 1, 'complaint', 1, 'Your complaint has been updated.', FALSE, datetime('now')),
+(2, 2, 'comment', 1, 'Your comment received a reply.', TRUE, datetime('now')),
+(3, 3, 'report', 2, 'Your report has been resolved.', FALSE, datetime('now'));
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>
